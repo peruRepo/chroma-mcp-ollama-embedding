@@ -16,7 +16,7 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules"
 ]
 dependencies = [
-    "chromadb>=1.0.3",
+    "chromadb>=1.0.10",
     "cohere>=5.14.2",
     "httpx>=0.28.1",
     "mcp[cli]>=1.2.1",
