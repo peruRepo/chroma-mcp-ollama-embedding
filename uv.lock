@@ -336,7 +336,7 @@ wheels = [
 
 [[package]]
 name = "chroma-mcp"
-version = "0.2.2"
+version = "3"
 source = { editable = "." }
 dependencies = [
     { name = "chromadb" },
