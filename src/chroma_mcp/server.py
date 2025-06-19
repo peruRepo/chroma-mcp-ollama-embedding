@@ -14,7 +14,7 @@ from typing_extensions import TypedDict
 
 
 from chromadb.api.collection_configuration import (
-    CreateCollectionConfiguration, CreateHNSWConfiguration, UpdateHNSWConfiguration, UpdateCollectionConfiguration
+    CreateCollectionConfiguration
     )
 from chromadb.api import EmbeddingFunction
 from chromadb.utils.embedding_functions import (
@@ -80,7 +80,6 @@ def get_chroma_client(args=None):
         
         # Load environment variables from .env file if it exists
         load_dotenv(dotenv_path=args.dotenv_path)
-        print(args.dotenv_path)
         if args.client_type == 'http':
             if not args.host:
                 raise ValueError("Host must be provided via --host flag or CHROMA_HOST environment variable when using HTTP client")
@@ -182,57 +181,19 @@ async def chroma_create_collection(
     collection_name: str,
     embedding_function_name: str = "default",
     metadata: Dict | None = None,
-    space: str | None = None,
-    ef_construction: int | None = None,
-    ef_search: int | None = None,
-    max_neighbors: int | None = None,
-    num_threads: int | None = None,
-    batch_size: int | None = None,
-    sync_threshold: int | None = None,
-    resize_factor: float | None = None,
 ) -> str:
     """Create a new Chroma collection with configurable HNSW parameters.
     
     Args:
         collection_name: Name of the collection to create
-        space: Distance function used in HNSW index. Options: 'l2', 'ip', 'cosine'
-        ef_construction: Size of the dynamic candidate list for constructing the HNSW graph
-        ef_search: Size of the dynamic candidate list for searching the HNSW graph
-        max_neighbors: Maximum number of neighbors to consider during HNSW graph construction
-        num_threads: Number of threads to use during HNSW construction
-        batch_size: Number of elements to batch together during index construction
-        sync_threshold: Number of elements to process before syncing index to disk
-        resize_factor: Factor to resize the index by when it's full
         embedding_function_name: Name of the embedding function to use. Options: 'default', 'cohere', 'openai', 'jina', 'voyageai', 'ollama', 'roboflow'
         metadata: Optional metadata dict to add to the collection
     """
     client = get_chroma_client()
-        
     
     embedding_function = mcp_known_embedding_functions[embedding_function_name]
     
-    hnsw_config = CreateHNSWConfiguration()
-    if space:
-        hnsw_config["space"] = space
-    if ef_construction:
-        hnsw_config["ef_construction"] = ef_construction
-    if ef_search:
-        hnsw_config["ef_search"] = ef_search
-    if max_neighbors:
-        hnsw_config["max_neighbors"] = max_neighbors
-    if num_threads:
-        hnsw_config["num_threads"] = num_threads
-    if batch_size:
-        hnsw_config["batch_size"] = batch_size
-    if sync_threshold:
-        hnsw_config["sync_threshold"] = sync_threshold
-    if resize_factor:
-        hnsw_config["resize_factor"] = resize_factor
-        
-        
-    
     configuration=CreateCollectionConfiguration(
-        hnsw=hnsw_config,
         embedding_function=embedding_function()
     )
     
@@ -310,11 +271,6 @@ async def chroma_modify_collection(
     collection_name: str,
     new_name: str | None = None,
     new_metadata: Dict | None = None,
-    ef_search: int | None = None,
-    num_threads: int | None = None,
-    batch_size: int | None = None,
-    sync_threshold: int | None = None,
-    resize_factor: float | None = None,
 ) -> str:
     """Modify a Chroma collection's name or metadata.
     
@@ -322,40 +278,17 @@ async def chroma_modify_collection(
         collection_name: Name of the collection to modify
         new_name: Optional new name for the collection
         new_metadata: Optional new metadata for the collection
-        ef_search: Size of the dynamic candidate list for searching the HNSW graph
-        num_threads: Number of threads to use during HNSW construction
-        batch_size: Number of elements to batch together during index construction
-        sync_threshold: Number of elements to process before syncing index to disk
-        resize_factor: Factor to resize the index by when it's full
     """
     client = get_chroma_client()
     try:
         collection = client.get_collection(collection_name)
-        
-        hnsw_config = UpdateHNSWConfiguration()
-        if ef_search:
-            hnsw_config["ef_search"] = ef_search
-        if num_threads:
-            hnsw_config["num_threads"] = num_threads
-        if batch_size:
-            hnsw_config["batch_size"] = batch_size
-        if sync_threshold:
-            hnsw_config["sync_threshold"] = sync_threshold
-        if resize_factor:
-            hnsw_config["resize_factor"] = resize_factor
-        
-        configuration = UpdateCollectionConfiguration(
-            hnsw=hnsw_config
-        )
-        collection.modify(name=new_name, configuration=configuration, metadata=new_metadata)
+        collection.modify(name=new_name, metadata=new_metadata)
         
         modified_aspects = []
         if new_name:
             modified_aspects.append("name")
         if new_metadata:
             modified_aspects.append("metadata")
-        if ef_search or num_threads or batch_size or sync_threshold or resize_factor:
-            modified_aspects.append("hnsw")
         
         return f"Successfully modified collection {collection_name}: updated {' and '.join(modified_aspects)}"
     except Exception as e:
@@ -662,30 +595,6 @@ def validate_thought_data(input_data: Dict) -> Dict:
         "branchId": input_data.get("branchId"),
         "needsMoreThoughts": input_data.get("needsMoreThoughts"),
     }
-    
-def process_thought(input_data: Dict) -> Dict:
-    """Process a new thought."""
-    try:
-        # Validate input data
-        validated_input = validate_thought_data(input_data)
-            
-        # Adjust total thoughts if needed
-        if validated_input["thoughtNumber"] > validated_input["totalThoughts"]:
-            validated_input["totalThoughts"] = validated_input["thoughtNumber"]
-            
-        # Return response
-        return {
-            "sessionId": validated_input["sessionId"],
-            "thoughtNumber": validated_input["thoughtNumber"],
-            "totalThoughts": validated_input["totalThoughts"],
-            "nextThoughtNeeded": validated_input["nextThoughtNeeded"],
-            }
-            
-    except Exception as e:
-        return {
-            "error": str(e),
-            "status": "failed"
-        }
 
 def main():
     """Entry point for the Chroma MCP server."""
