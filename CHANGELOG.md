@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.6] - 08/14/2025
+
+- Update chromadb to 1.0.16
+- Add tool prompts for regex support
+- Add new `chroma_fork_collection` tool support
+
 ## [0.2.5] - 06/18/2025
 
 - Update chromadb to 1.0.13
