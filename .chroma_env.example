@@ -20,7 +20,7 @@ CHROMA_CLIENT_TYPE=ephemeral  # Options: ephemeral, persistent, http, cloud
 # Ollama Embedding Configuration (default embedding function)
 # These are the default values - only set if you need to override them
 EMBEDDINGS_URL=http://localhost:11434
-EMBEDDINGS_MODEL=all-MiniLM-L6-v2
+EMBEDDINGS_MODEL=all-minilm
 
 # Alternative Ollama configurations you might want to try:
 # EMBEDDINGS_MODEL=nomic-embed-text

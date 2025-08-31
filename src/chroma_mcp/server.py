@@ -174,10 +174,12 @@ def _ollama_embedding_factory() -> EmbeddingFunction:
 
     Environment variables:
     - EMBEDDINGS_URL: Base URL for the Ollama server. Defaults to http://localhost:11434
-    - EMBEDDINGS_MODEL: Embedding model name. Defaults to chroma/all-minilm-l6-v2-f32
+    - EMBEDDINGS_MODEL: Embedding model name. Defaults to all-minilm
     """
     base_url = os.getenv("EMBEDDINGS_URL", "http://localhost:11434")
-    model = os.getenv("EMBEDDINGS_MODEL", "chroma/all-minilm-l6-v2-f32")
+    # Default embedding model changed to a more generic "all-minilm". Users
+    # can override with the EMBEDDINGS_MODEL environment variable.
+    model = os.getenv("EMBEDDINGS_MODEL", "all-minilm")
     return OllamaEmbeddingFunction(url=base_url, model_name=model)
 
 # Map of embedding function names to factories (callables returning EmbeddingFunction)

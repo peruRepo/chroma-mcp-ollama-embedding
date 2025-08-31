@@ -76,14 +76,25 @@ When accessing embedding functions that utilize external APIs, please be sure to
 
 ## Usage with Claude Desktop
 
-1. To add an ephemeral client, add the following to your `claude_desktop_config.json` file:
+1. To add an ephemeral client, add the following to your `claude_desktop_config.json` file (sanitized example):
 
 ```json
 "chroma": {
-    "command": "uvx",
-    "args": [
-        "chroma-mcp"
-    ]
+  "command": "uv",
+  "args": [
+    "run",
+    "--directory",
+    "/path/to/chroma-mcp-repo",
+    "python",
+    "-m",
+    "chroma_mcp",
+    "--client-type",
+    "persistent",
+    "--data-dir",
+    "/path/to/chroma-data"
+  ],
+  "env": {},
+  "type": "stdio"
 }
 ```
 
@@ -191,7 +202,9 @@ For Ollama/“Volama”-based embeddings, you can control the server URL and mod
 ```bash
 # Defaults used if not provided
 export EMBEDDINGS_URL="http://localhost:11434"
-export EMBEDDINGS_MODEL="all-MiniLM-L6-v2"
+export EMBEDDINGS_MODEL="all-minilm"
 ```
+
+If you use a Claude/desktop-like config file, you can also point to a small `mcp.json` sample. See `samples/mcp.json` for a minimal example which shows how to set environment variables for the embedding model.
 
 When creating a collection with `embedding_function_name` set to `ollama`/`volama` (the default), the server uses these values to configure the embedding function.
