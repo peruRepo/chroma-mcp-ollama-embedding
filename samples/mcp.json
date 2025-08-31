@@ -1,0 +1,24 @@
+{
+  "mcpServers": {
+    "chroma": {
+      "command": "uv",
+      "args": [
+        "run",
+        "--directory",
+        "/path/to/chroma-mcp-repo",
+        "python",
+        "-m",
+        "chroma_mcp",
+        "--client-type",
+        "persistent",
+        "--data-dir",
+        "/path/to/chroma-data"
+      ],
+      "env": {
+        "EMBEDDINGS_URL": "http://localhost:11434",
+        "EMBEDDINGS_MODEL": "all-minilm"
+      },
+      "type": "stdio"
+    }
+  }
+}
