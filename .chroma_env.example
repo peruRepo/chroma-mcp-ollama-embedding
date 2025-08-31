@@ -1,0 +1,31 @@
+# Example environment configuration for Chroma MCP with Ollama embedding
+# Copy this file to .chroma_env and modify as needed
+
+# Chroma Client Configuration
+CHROMA_CLIENT_TYPE=ephemeral  # Options: ephemeral, persistent, http, cloud
+
+# For persistent client
+# CHROMA_DATA_DIR=/path/to/your/data/directory
+
+# For HTTP client (self-hosted)
+# CHROMA_HOST=your-host
+# CHROMA_PORT=your-port
+# CHROMA_SSL=true
+
+# For cloud client
+# CHROMA_TENANT=your-tenant-id
+# CHROMA_DATABASE=your-database-name
+# CHROMA_API_KEY=your-api-key
+
+# Ollama Embedding Configuration (default embedding function)
+# These are the default values - only set if you need to override them
+EMBEDDINGS_URL=http://localhost:11434
+EMBEDDINGS_MODEL=all-MiniLM-L6-v2
+
+# Alternative Ollama configurations you might want to try:
+# EMBEDDINGS_MODEL=nomic-embed-text
+# EMBEDDINGS_MODEL=llama2:7b
+# EMBEDDINGS_URL=http://your-ollama-server:11434
+
+# Optional: Path to a custom .env file
+# CHROMA_DOTENV_PATH=/path/to/your/.env

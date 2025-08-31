@@ -24,6 +24,7 @@ from chromadb.utils.embedding_functions import (
     JinaEmbeddingFunction,
     VoyageAIEmbeddingFunction,
     RoboflowEmbeddingFunction,
+    OllamaEmbeddingFunction,
 )
 
 # Initialize FastMCP server
@@ -168,33 +169,51 @@ async def chroma_list_collections(
     except Exception as e:
         raise Exception(f"Failed to list collections: {str(e)}") from e
 
-mcp_known_embedding_functions: Dict[str, EmbeddingFunction] = {
-    "default": DefaultEmbeddingFunction,
-    "cohere": CohereEmbeddingFunction,
-    "openai": OpenAIEmbeddingFunction,
-    "jina": JinaEmbeddingFunction,
-    "voyageai": VoyageAIEmbeddingFunction,
-    "roboflow": RoboflowEmbeddingFunction,
+def _ollama_embedding_factory() -> EmbeddingFunction:
+    """Create an Ollama/Volama embedding function from environment variables.
+
+    Environment variables:
+    - EMBEDDINGS_URL: Base URL for the Ollama server. Defaults to http://localhost:11434
+    - EMBEDDINGS_MODEL: Embedding model name. Defaults to chroma/all-minilm-l6-v2-f32
+    """
+    base_url = os.getenv("EMBEDDINGS_URL", "http://localhost:11434")
+    model = os.getenv("EMBEDDINGS_MODEL", "chroma/all-minilm-l6-v2-f32")
+    return OllamaEmbeddingFunction(url=base_url, model_name=model)
+
+# Map of embedding function names to factories (callables returning EmbeddingFunction)
+mcp_known_embedding_functions = {
+    # Keep a true Chroma default available explicitly
+    "default": lambda: DefaultEmbeddingFunction(),
+    "cohere": lambda: CohereEmbeddingFunction(),
+    "openai": lambda: OpenAIEmbeddingFunction(),
+    "jina": lambda: JinaEmbeddingFunction(),
+    "voyageai": lambda: VoyageAIEmbeddingFunction(),
+    "roboflow": lambda: RoboflowEmbeddingFunction(),
+    # Ollama/Volama (default for this server)
+    "ollama": _ollama_embedding_factory,
+    "volama": _ollama_embedding_factory,  # alias for convenience per request wording
 }
 @mcp.tool()
 async def chroma_create_collection(
     collection_name: str,
-    embedding_function_name: str = "default",
+    embedding_function_name: str = "ollama",
     metadata: Dict | None = None,
 ) -> str:
     """Create a new Chroma collection with configurable HNSW parameters.
     
     Args:
         collection_name: Name of the collection to create
-        embedding_function_name: Name of the embedding function to use. Options: 'default', 'cohere', 'openai', 'jina', 'voyageai', 'ollama', 'roboflow'
+        embedding_function_name: Name of the embedding function to use. Options: 'ollama' (default), 'volama', 'default', 'cohere', 'openai', 'jina', 'voyageai', 'roboflow'.
+            When using 'ollama'/'volama', URL and model can be overridden via env vars
+            `EMBEDDINGS_URL` and `EMBEDDINGS_MODEL` (defaults: http://localhost:11434, nomic-embed-text).
         metadata: Optional metadata dict to add to the collection
     """
     client = get_chroma_client()
     
-    embedding_function = mcp_known_embedding_functions[embedding_function_name]
+    embedding_factory = mcp_known_embedding_functions[embedding_function_name]
     
     configuration=CreateCollectionConfiguration(
-        embedding_function=embedding_function()
+        embedding_function=embedding_factory()
     )
     
     try:

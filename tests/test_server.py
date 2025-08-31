@@ -1,8 +1,12 @@
 import pytest
-from chroma_mcp.server import get_chroma_client, create_parser, mcp
-import chromadb
 import sys
 import os
+
+# Add the src directory to Python path
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
+
+from chroma_mcp.server import get_chroma_client, create_parser, mcp
+import chromadb
 from unittest.mock import patch, MagicMock
 import argparse
 from mcp.server.fastmcp.exceptions import ToolError # Import ToolError
