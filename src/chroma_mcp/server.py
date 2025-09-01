@@ -170,7 +170,7 @@ async def chroma_list_collections(
         raise Exception(f"Failed to list collections: {str(e)}") from e
 
 def _ollama_embedding_factory() -> EmbeddingFunction:
-    """Create an Ollama/Volama embedding function from environment variables.
+    """Create an Ollama embedding function from environment variables.
 
     Environment variables:
     - EMBEDDINGS_URL: Base URL for the Ollama server. Defaults to http://localhost:11434
@@ -191,9 +191,8 @@ mcp_known_embedding_functions = {
     "jina": lambda: JinaEmbeddingFunction(),
     "voyageai": lambda: VoyageAIEmbeddingFunction(),
     "roboflow": lambda: RoboflowEmbeddingFunction(),
-    # Ollama/Volama (default for this server)
+    # Ollama (default for this server)
     "ollama": _ollama_embedding_factory,
-    "volama": _ollama_embedding_factory,  # alias for convenience per request wording
 }
 @mcp.tool()
 async def chroma_create_collection(
@@ -205,8 +204,8 @@ async def chroma_create_collection(
     
     Args:
         collection_name: Name of the collection to create
-        embedding_function_name: Name of the embedding function to use. Options: 'ollama' (default), 'volama', 'default', 'cohere', 'openai', 'jina', 'voyageai', 'roboflow'.
-            When using 'ollama'/'volama', URL and model can be overridden via env vars
+        embedding_function_name: Name of the embedding function to use. Options: 'ollama' (default), 'default', 'cohere', 'openai', 'jina', 'voyageai', 'roboflow'.
+            When using 'ollama', URL and model can be overridden via env vars
             `EMBEDDINGS_URL` and `EMBEDDINGS_MODEL` (defaults: http://localhost:11434, nomic-embed-text).
         metadata: Optional metadata dict to add to the collection
     """
